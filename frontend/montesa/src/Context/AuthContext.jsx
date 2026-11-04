@@ -64,7 +64,10 @@ export function AuthProvider({ children }) {
         setUser(userData);
         updateAccessToken(token);
     };
-
+    // Update User Profile
+const updateUser = (userData) => {
+    setUser(userData);
+};
     // Logout
     const logout = () => {
         updateAccessToken(null);
@@ -78,7 +81,8 @@ export function AuthProvider({ children }) {
                 isLoading,
                 isAuthenticated: Boolean(accessToken),
                 login,
-                logout
+                logout,
+                updateUser
             }}
         >
             {children}

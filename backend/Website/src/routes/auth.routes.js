@@ -1,5 +1,6 @@
 import { Router } from "express";
 import * as authController from "../controllers/auth.controller.js" 
+import authMiddleware from "../middleware/auth.middleware.js";
 
 const authrouter = Router();
 
@@ -32,4 +33,9 @@ authrouter.post("/login",authController.login)
 authrouter.post("/verify-otp",authController.verifyOtp)
 
 authrouter.post("/resendOtp",authController.resendOtp)
+authrouter.patch(
+  "/update-profile",
+  authMiddleware,
+  authController.updateProfile
+);
 export default authrouter;

@@ -2,12 +2,13 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 import '@fortawesome/fontawesome-free/css/all.min.css'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import About_us from './pages/About_us.jsx'
 
-import Cart from './pages/Cart.jsx'
+import Cart from './common/Cart.jsx'
 import Contact_us from './pages/Contact_us.jsx'
 import Login from './Login.jsx'
 import Frequently_question from './pages/Frequently_question.jsx'
@@ -17,7 +18,10 @@ import Privacy_policy from './pages/Privacy_policy.jsx'
 import MywishList from './common/MywishList.jsx'
 import MyDashBoard from './pages/MyDashBoard/MyDashBorad.jsx'
 import { AuthProvider } from './Context/AuthContext';
-import MyProfile from './pages/MyProfile'
+import Checkout from './common/Checkout'
+
+
+
 
 let allRoutes = createBrowserRouter([
   { 
@@ -59,16 +63,15 @@ let allRoutes = createBrowserRouter([
   }
   ,
   {
-    path:'/wishlist',
-    element:<MywishList/>
-  },
-  {
     path:'/MyDashBoard',
     element:<MyDashBoard/>
   },
   {
-    path:'/MyProfile',
-    element:<MyProfile/>
+    path:'/MywishList',
+    element:<MywishList/>
+  },{
+    path:'/Checkout',
+    element:<Checkout/>
   }
 
 ])
@@ -77,6 +80,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
   <RouterProvider router={allRoutes}/>
+    <ToastContainer position="top-right" autoClose={3000} />
     </AuthProvider>
   
   </StrictMode>,

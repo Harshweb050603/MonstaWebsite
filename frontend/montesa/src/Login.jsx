@@ -29,7 +29,7 @@ export default function Login() {
     const {
         login: saveLogin,
         user,
-        isLoading,
+       
         isAuthenticated,
         accessToken
     } = useAuth();
@@ -126,11 +126,7 @@ export default function Login() {
         <>
             <Header />
             <ToastContainer />
-            {isLoading ? (
-                <p>Checking session...</p>
-            ) : (
-                <p>Session check complete</p>
-            )}
+           
             <div className='container mx-auto max-w-7xl py-15 text-center border-gray-300 border-b-1'>
                 <h1 className='text-center text-4xl about-heading font-bold'>My Account</h1>
                 <span className='p-2 inline-block text-[18px] font-400'>

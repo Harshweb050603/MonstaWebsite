@@ -6,7 +6,7 @@ import { Navigation } from 'swiper/modules'
 
 import 'swiper/css'
 import 'swiper/css/navigation'
-export default function Bestselliing_products({ title, products }) {
+export default function Bestselliing_products({ title, products , wishlistIds ,   onWishlistChange}) {
 
     console.log(    'Bestselling Products:', products); // Log the products to the console
 
@@ -101,7 +101,10 @@ export default function Bestselliing_products({ title, products }) {
                             <SwiperSlide key={product._id}>
                                 <Card
                                  product={product} 
-                                  products={products}/>
+                                  products={products}
+                                   wishlistIds={wishlistIds}
+                                   onWishlistChange={onWishlistChange}/>
+                                 
                             </SwiperSlide>
                         ))}
 

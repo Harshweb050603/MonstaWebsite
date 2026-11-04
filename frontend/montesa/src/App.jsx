@@ -5,7 +5,8 @@ import Header from '../src/common/Header.jsx'
 import herosection from '../public/photos/Online Furniture in India/herosection.jpg'
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Autoplay } from 'swiper/modules';
-
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -21,22 +22,48 @@ import api from './services/api.jsx';
 
 export default function App() {
 
-    const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [wishlistIds, setWishlistIds] = useState([]);
+ const handleWishlistChange = (productId, action) => {
+  if (action === "add") {
+    setWishlistIds((prevIds) =>
+      prevIds.includes(productId) ? prevIds : [...prevIds, productId]
+    );
+  } else if (action === "remove") {
+    setWishlistIds((prevIds) =>
+      prevIds.filter((id) => id !== productId)
+    );
+  }
+};
+  useEffect(() => {
+    api.get("/api/product/getProducts")
+      .then((response) => {
+        setProducts(response.data.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching products:", error);
+      });
+  }, []);
 
-    useEffect(() => {
-        api.get("/api/product/getProducts")
-            .then((response) => {
-                setProducts(response.data.data);
-            })
-            .catch((error) => {
-                console.error("Error fetching products:", error);
-            });
-    }, []);
+  useEffect(() => {
+    const fetchWishlist = async () => {
+      try {
+        const response = await api.get("/api/wishlist");
 
+        const products = response.data.wishlist?.products || [];
 
+        setWishlistIds(products.map((product) => product._id));
+
+      } catch (error) {
+        console.log("Wishlist fetch error:", error);
+      }
+    };
+
+    fetchWishlist();
+  }, []);
   return (
     <>
-
+      <ToastContainer position="top-right" autoClose={3000} />
 
       <Header />
       <div className='hero-section'>
@@ -97,9 +124,13 @@ export default function App() {
         {
           products.map((product) => (
             <Card key={product._id}
-             product={product} 
-             products={products} />
-          ))  
+              product={product}
+              products={products}
+              wishlistIds={wishlistIds}
+               onWishlistChange={handleWishlistChange}
+            />
+
+          ))
         }
       </div>
       {/* trending collection */}
@@ -120,6 +151,8 @@ export default function App() {
       <Bestselliing_products
         title='BestSelling Products'
         products={products}
+        wishlistIds={wishlistIds}
+         onWishlistChange={handleWishlistChange}
       />
       {/* About facilities provide  */}
       <div className='w-full bg-[#F8F9F9] mt-5'>

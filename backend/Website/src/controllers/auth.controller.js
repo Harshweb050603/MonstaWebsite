@@ -236,7 +236,7 @@ export async function refreshToken(req, res) {
     });
 
     return res.status(200).json({
-      message: "Access token generated successfully",
+      message: " new Access token generated successfully",
       accessToken
     });
 
@@ -398,4 +398,66 @@ export async function resendOtp(req,res){
 
 
 
+}
+
+export async function updateProfile(req, res) {
+  try {
+    const { username, email } = req.body;
+
+    if (!username?.trim() || !email?.trim()) {
+      return res.status(400).json({
+        success: false,
+        message: "Username and email are required",
+      });
+    }
+
+    // Check whether another user already uses this username or email
+    const existingUser = await userModel.findOne({
+      _id: { $ne: req.user.id },
+      $or: [
+        { username: username.trim() },
+        { email: email.trim() },
+      ],
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "Username or email already exists",
+      });
+    }
+
+    const updatedUser = await userModel.findByIdAndUpdate(
+      req.user.id,
+      {
+        username: username.trim(),
+        email: email.trim(),
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select("username email verified");
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
+
+  } catch (error) {
+    console.error("Update Profile Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
 }

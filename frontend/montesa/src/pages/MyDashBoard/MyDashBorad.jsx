@@ -1,9 +1,41 @@
 import Header from "@/common/Header"
 import CommonHeading from "@/common/CommonHeading"
 import OrderDetails from "./OrderDetails";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import Orders from "./Orders";
+import MyProfile from "./MyProfile";
+import Address from "./Address";
+import ChangePassword from "./ChangePassword";
+import { useAuth } from "@/Context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import api from "@/services/api";
 export default function MyDashBoard() {
-    const [selectedOrder, setSelectedOrder] = useState(false);
+    const [selectedOrder, setSelectedOrder] = useState(null);
+    const [activeTab, setActiveTab] = useState("dashboard");
+    const { logout } = useAuth();
+    const navigate = useNavigate();
+    const [recentOrders, setRecentOrders] = useState([]);
+    const handleLogout = async () => {
+        try {
+            await api.post("/api/auth/logout");
+            logout();
+            navigate("/Login");
+        } catch (error) {
+            console.log("Logout error:", error);
+        }
+    };
+    useEffect(() => {
+        const fetchRecentOrders = async () => {
+            try {
+                const response = await api.get("/api/orders/my-orders");
+                setRecentOrders(response.data.orders.slice(0, 5));
+            } catch (error) {
+                console.log("Recent Orders Error:", error);
+            }
+        };
+
+        fetchRecentOrders();
+    }, []);
     return (
         <>
             <Header />
@@ -24,37 +56,63 @@ export default function MyDashBoard() {
                         <ul className="flex flex-col gap-2">
 
                             <li>
-                                <button className="w-full text-left px-3 py-3 rounded-md bg-[#C09578] text-white">
+                                <button
+                                    onClick={() => setActiveTab("dashboard")}
+                                    className={`w-full text-left px-3 py-3 rounded-md text-white ${activeTab === "dashboard"
+                                        ? "bg-[#C09578]"
+                                        : "bg-black hover:bg-[#C09578]"
+                                        }`}
+                                >
                                     My Dashboard
                                 </button>
                             </li>
 
                             <li>
-                                <button className="w-full text-left px-4 py-3 rounded-md  bg-black hover:bg-[#C09578] text-white">
+                                <button
+
+                                    onClick={() => setActiveTab("orders")}
+                                    className={`w-full text-left px-4 py-3 rounded-md text-white ${activeTab === "orders"
+                                        ? "bg-[#C09578]"
+                                        : "bg-black hover:bg-[#C09578]"
+                                        }`}
+                                >
                                     Orders
                                 </button>
                             </li>
 
                             <li>
-                                <button className="w-full text-left px-4 py-3 rounded-md  bg-black hover:bg-[#C09578] text-white">
+                                <button onClick={() => setActiveTab("profile")}
+                                    className={`w-full text-left px-4 py-3 rounded-md text-white ${activeTab === "profile"
+                                        ? "bg-[#C09578]"
+                                        : "bg-black hover:bg-[#C09578]"
+                                        }`}>
                                     My Profile
                                 </button>
                             </li>
 
                             <li>
-                                <button className="w-full text-left px-4 py-3 rounded-md  bg-black hover:bg-[#C09578] text-white">
+                                <button onClick={() => setActiveTab("address")}
+                                    className={`w-full text-left px-4 py-3 rounded-md text-white ${activeTab === "address"
+                                        ? "bg-[#C09578]"
+                                        : "bg-black hover:bg-[#C09578]"
+                                        }`}>
                                     Address
                                 </button>
                             </li>
 
                             <li>
-                                <button className="w-full text-left px-4 py-3 rounded-md  bg-black hover:bg-[#C09578] text-white">
+                                <button onClick={() => setActiveTab("password")}
+                                    className={`w-full text-left px-4 py-3 rounded-md text-white ${activeTab === "password"
+                                        ? "bg-[#C09578]"
+                                        : "bg-black hover:bg-[#C09578]"
+                                        }`}>
                                     Change Password
                                 </button>
                             </li>
 
                             <li>
-                                <button className="w-full text-left px-4 py-3 rounded-md text-red-50 bg-black hover:bg-[#C09578] text-white">
+                                <button onClick={handleLogout}
+                                    className='w-full text-left px-4 py-3 rounded-md text-white  bg-black hover:bg-[#C09578]'>
                                     Logout
                                 </button>
                             </li>
@@ -63,83 +121,111 @@ export default function MyDashBoard() {
                     </div>
                     {/* right Side for Data */}
                     <div className="right">
-                            {
-                                selectedOrder ? ( <OrderDetails/>) : ( <>
+                        {
+                            activeTab === "orderDetails" ? (
+                                <OrderDetails
+                                    order={selectedOrder}
+                                    onBack={() => setActiveTab("orders")}
+                                />)
+                                : activeTab === "orders"
+                                    ? (<Orders
+                                        onView={(order) => {
+                                            setSelectedOrder(order);
+                                            setActiveTab("orderDetails");
+                                        }}
+                                    />
 
-                                     <div className="border border-gray-200 rounded-md p-6">
+                                    )
+                                    :
+                                    activeTab === "profile" ? (
+                                        <MyProfile />
+                                    ) : activeTab === 'address' ? (
+                                        <Address />
+                                    ) : activeTab === 'password' ? (
+                                        <ChangePassword />
+                                    ) :
+                                        (<>
 
-                            <h2 className="text-2xl font-semibold mb-3">
-                                Welcome to My Account!
-                            </h2>
+                                            <div className="mt-8">
+                                                <div className="flex justify-between items-center mb-5">
+                                                    <h2 className="text-xl font-semibold">
+                                                        Recent Orders
+                                                    </h2>
 
-                            <p className="text-gray-600 leading-7">
-                                From your account dashboard, you can easily check your recent
-                                orders, manage your shipping and billing addresses, and edit
-                                your password and account details.
-                            </p>
+                                                    <button
+                                                        onClick={() => setActiveTab("orders")}
+                                                        className="text-[#C09578] font-medium hover:underline"
+                                                    >
+                                                        View All
+                                                    </button>
+                                                </div>
 
-                        </div>
-                        <div className="mt-8">
+                                                <div className="overflow-x-auto border border-gray-200 rounded-md">
+                                                    <table className="w-full text-left">
 
-                            <h2 className="text-xl font-semibold mb-5">
-                                Recent Orders
-                            </h2>
+                                                        <thead className="bg-gray-100">
+                                                            <tr>
+                                                                <th className="p-4">Product</th>
+                                                                <th className="p-4">Price</th>
+                                                                <th className="p-4">Quantity</th>
+                                                                <th className="p-4">Total</th>
+                                                                <th className="p-4">Action</th>
+                                                            </tr>
+                                                        </thead>
 
-                            <div className="overflow-x-auto border border-gray-200 rounded-md">
+                                                        <tbody>
+                                                            {recentOrders.length > 0 ? (
+                                                                recentOrders.map((order) => (
+                                                                    <tr key={order._id} className="border-t">
 
-                                <table className="w-full text-left">
+                                                                        <td className="p-4">
+                                                                            {order.products[0]?.name}
+                                                                            {order.products.length > 1 &&
+                                                                                ` + ${order.products.length - 1} more`
+                                                                            }
+                                                                        </td>
 
-                                    <thead className="bg-gray-100">
-                                        <tr>
-                                            <th className="p-4">Product</th>
-                                            <th className="p-4">Price</th>
-                                            <th className="p-4">Quantity</th>
-                                            <th className="p-4">Total</th>
-                                            <th className="p-4">Action</th>
-                                        </tr>
-                                    </thead>
+                                                                        <td className="p-4">
+                                                                            ₹{order.products[0]?.price?.toLocaleString("en-IN")}
+                                                                        </td>
 
-                                    <tbody>
+                                                                        <td className="p-4">
+                                                                            {order.products[0]?.quantity}
+                                                                        </td>
 
-                                        <tr className="border-t">
-                                            <td className="p-4">
-                                                Modern Sofa
-                                            </td>
-                                            <td className="p-4">₹25,000</td>
-                                            <td className="p-4">1</td>
-                                            <td className="p-4">₹25,000</td>
-                                            <td className="p-4">
-                                                <button className="text-[#C09578] font-medium hover:underline"
-                                                  onClick={() => setSelectedOrder(true)}>
-                                                    View
-                                                </button>
-                                            </td>
-                                        </tr>
+                                                                        <td className="p-4">
+                                                                            ₹{order.totalAmount?.toLocaleString("en-IN")}
+                                                                        </td>
 
-                                        <tr className="border-t">
-                                            <td className="p-4">
-                                                Wooden Dining Table
-                                            </td>
-                                            <td className="p-4">₹15,000</td>
-                                            <td className="p-4">2</td>
-                                            <td className="p-4">₹30,000</td>
-                                            <td className="p-4">
-                                                <button className="text-[#C09578] font-medium hover:underline"
-                                              onClick={() => setSelectedOrder(true)}>
-                                                    View
-                                                </button>
-                                            </td>
-                                        </tr>
+                                                                        <td className="p-4">
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    setSelectedOrder(order);
+                                                                                    setActiveTab("orderDetails");
+                                                                                }}
+                                                                                className="text-[#C09578] font-medium hover:underline"
+                                                                            >
+                                                                                View
+                                                                            </button>
+                                                                        </td>
 
-                                    </tbody>
+                                                                    </tr>
+                                                                ))
+                                                            ) : (
+                                                                <tr>
+                                                                    <td colSpan="5" className="p-6 text-center text-gray-500">
+                                                                        No recent orders found.
+                                                                    </td>
+                                                                </tr>
+                                                            )}
+                                                        </tbody>
 
-                                </table>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </>)
+                        }
 
-                            </div>
-                        </div>
-                                </>)
-                            }
-                       
 
                     </div>
                 </div>
